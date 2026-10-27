@@ -1,7 +1,7 @@
 # Everything the API needs except the embedding model itself.
 # CI installs only this (plus requirements-dev.txt): the tests use a stand-in
 # encoder, so they don't need the ~800 MB torch + sentence-transformers download.
-fastapi>=0.110
+fastapi>=0.162.0
 uvicorn[standard]>=0.29
 pydantic>=2.6
 numpy>=1.24
