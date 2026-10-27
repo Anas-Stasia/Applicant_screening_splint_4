@@ -1,0 +1,14 @@
+# Lint config for the serving package (run: ruff check .). CI fails on any finding.
+line-length = 120
+target-version = "py311"
+
+[lint]
+# pyflakes, pycodestyle errors, import order, bugbear, pyupgrade
+select = ["F", "E", "W", "I", "B", "UP"]
+ignore = [
+    "B008",  # FastAPI's Depends()/Query() in defaults is the intended pattern
+    "B905",  # zip(strict=...) — lengths are equal by construction here
+]
+
+[lint.isort]
+known-first-party = ["app"]

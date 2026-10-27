@@ -1,0 +1,19 @@
+# Build context = repo root. Keep it small: the image only needs serving/.
+.git
+.github
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/.ipynb_checkpoints
+.venv
+venv
+data_pipeline
+*.ipynb
+serving/logs
+serving/tests
+docs
+kaggle.json
+access_token
+.kaggle
+.env

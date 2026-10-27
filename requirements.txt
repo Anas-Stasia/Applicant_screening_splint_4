@@ -3,3 +3,11 @@ numpy>=1.24.0
 nltk>=3.8.0
 beautifulsoup4>=4.12.0
 kaggle>=1.6.0
+scikit-learn>=1.3.0
+sentence-transformers>=2.6.0
+transformers>=4.40.0
+joblib>=1.3.0
+# Serving layer (Sprints 3–4): see serving/requirements*.txt
+fastapi>=0.110
+uvicorn[standard]>=0.29
+httpx>=0.27

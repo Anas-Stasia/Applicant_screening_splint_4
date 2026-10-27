@@ -1,0 +1,27 @@
+# Local production-like run:   docker compose up --build
+# then: http://localhost:8000/docs  ·  /demo  ·  /metrics  ·  /v1/monitoring/drift
+services:
+  api:
+    build:
+      context: .
+      dockerfile: serving/Dockerfile
+      args:
+        GIT_SHA: ${GIT_SHA:-local}
+    image: screening-api:local
+    ports:
+      - "8000:8000"
+    environment:
+      SCREENING_ENVIRONMENT: compose
+      SCREENING_LOG_FORMAT: text          # easier to read in a terminal; the image default is json
+      SCREENING_API_KEY: ${SCREENING_API_KEY:-}
+      SCREENING_CORS_ORIGINS: ${SCREENING_CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+    volumes:
+      - prediction-logs:/srv/logs        # prediction logs survive container restarts
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
+
+volumes:
+  prediction-logs:

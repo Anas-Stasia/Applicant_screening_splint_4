@@ -1,0 +1,7 @@
+# Tests, lint and notebook checks. Deliberately does NOT pull in requirements.txt
+# (torch); install that too if you want to run the real model locally.
+-r requirements-core.txt
+pytest>=8.0
+ruff>=0.5
+pyyaml>=6.0          # tests/test_deploy.py parses render.yaml
+nbformat>=5.9        # tests/test_pipeline.py validates the notebooks

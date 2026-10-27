@@ -1,0 +1,27 @@
+# Render Blueprint — New → Blueprint → pick this repo. Render builds serving/Dockerfile,
+# waits for /ready to return 200, then switches traffic (zero-downtime deploys).
+services:
+  - type: web
+    name: applicant-screening-api
+    runtime: docker
+    dockerfilePath: ./serving/Dockerfile
+    dockerContext: .
+    # torch + MiniLM need roughly 0.5-1 GB of RAM, so the 512 MB instances (free,
+    # 0.5c-512mb) are likely to run out of memory. 1c-2g = 1 CPU / 2 GB.
+    plan: 1c-2g
+    region: oregon
+    healthCheckPath: /ready
+    # GitHub flow: a merge to main deploys only after the CI workflow (lint, tests,
+    # Docker build + smoke test) has passed on that commit. See docs/CONTRIBUTING.md.
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: SCREENING_ENVIRONMENT
+        value: render
+      # Render's disk is wiped on each deploy, so also send prediction records to
+      # stdout, where Render keeps them in the Logs tab / log streams.
+      - key: SCREENING_LOG_PREDICTIONS_STDOUT
+        value: "true"
+      - key: SCREENING_API_KEY
+        generateValue: true   # copy it from the dashboard and share it with the squads
+      - key: SCREENING_CORS_ORIGINS
+        sync: false           # set to the Frontend squad's deployed URL in the dashboard

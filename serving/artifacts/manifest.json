@@ -1,0 +1,41 @@
+{
+  "created_at": "2026-10-24T10:41:39+00:00",
+  "model": "all-MiniLM-L6-v2",
+  "resumes": 2481,
+  "categories": 24,
+  "max_chars": 3000,
+  "reference": {
+    "low_confidence_rate": 0.167271,
+    "similarity_floor": 0.35
+  },
+  "files": {
+    "embeddings/job_embeddings.npy": {
+      "sha256": "cc492a7a0568b599d8e05fedd07a29d7271d37992a072754b94c10f2062e306a",
+      "bytes": 36992
+    },
+    "embeddings/job_index.csv": {
+      "sha256": "2ce36708d60e91b633fbca23ddd2b40b2840a9d15f29bb802639c4957a461ab6",
+      "bytes": 280
+    },
+    "embeddings/resume_embeddings.npy": {
+      "sha256": "87bb56d054b7673de9ad0e4c5d28f1d4fd3751518ff9640718b892f1e24cc1de",
+      "bytes": 3810944
+    },
+    "embeddings/resume_index.csv": {
+      "sha256": "8bfe84e06e701361b0de9a1e874b56c554c8b0649496bf8c53a79ecf42e09ab3",
+      "bytes": 50836
+    },
+    "job_descriptions.csv": {
+      "sha256": "ea587911964ad1c6c543371122f17320fe1ea0e18b8f7de702fe0f100db14a36",
+      "bytes": 10529
+    },
+    "reference_profile.json": {
+      "sha256": "0e87e6e00867edbca8959d69ebd7d02d8422a148dfb14565c52e7d80fca7d222",
+      "bytes": 10543
+    },
+    "resumes_clean.csv.gz": {
+      "sha256": "09c362444cc0f7fe628f4894149a4322a7ba20f4c5fb6db685db2e753b4caffe",
+      "bytes": 2338582
+    }
+  }
+}

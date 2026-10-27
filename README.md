@@ -1,5 +1,60 @@
-# Applicant Screening & Recommendation Tool — Sprint 1
-### Product & Data Pipeline
+# Applicant Screening & Recommendation Tool
+### Sprint 1: Product & Data Pipeline · Sprint 2: Modeling & Evaluation · Sprint 3: Serving & Integration · Sprint 4: Team & Production
+
+[![ci](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+
+A first-pass resume screener: it ranks applicants against a job with MiniLM sentence
+embeddings and flags the ones it isn't sure about. A person makes the hiring decision.
+
+## Quick start
+
+```bash
+docker compose up --build          # production image → http://localhost:8000/docs  ·  /demo
+```
+or without Docker:
+```bash
+cd serving
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+pip install -r requirements-dev.txt && pytest -q     # no model download needed
+```
+A fresh clone works without running any notebook: the server loads the committed bundle in
+`serving/artifacts/`. Once you've run the notebooks, it uses `data_pipeline/data/processed/` instead.
+
+## Sprint 4 — Team & Production (new)
+
+| Checklist item | Where |
+|---|---|
+| Docker containerization for ML microservices | `serving/Dockerfile`, `docker-compose.yml`, `.dockerignore`, `serving/scripts/export_artifacts.py` |
+| Cloud deployment (Render / AWS / Railway) | `render.yaml`, `railway.json`, `deploy/aws/deploy_ecs_express.sh`, [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
+| Prediction logging & monitoring data drift | `serving/app/monitoring.py`, `GET /v1/monitoring/drift`, `GET /metrics`, `serving/scripts/drift_report.py`, [`docs/MONITORING.md`](docs/MONITORING.md) |
+| GitHub flow & automated testing for ML pipelines | `.github/workflows/ci.yml`, `serving/tests/test_pipeline.py`, [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) |
+| Final demo and technical presentation | [`docs/DEMO.md`](docs/DEMO.md), `data_pipeline/sprint4_production.ipynb` |
+
+* **Logging:** one JSON line per prediction (request id, model, build, status, score, latency, text length
+  and hash). The resume text itself is never logged.
+* **Drift:** recent traffic is compared with the training cohort on six checks (PSI on similarity,
+  category mix and text length, the low-confidence and rejection rates, and the embedding centroid).
+  The thresholds account for small-window noise.
+* **Deploy:** one image (model baked in, non-root, `$PORT`, `/ready` health check) for Render, Railway or
+  AWS ECS Express Mode, with `smoke_test.py` after every deploy.
+* **CI:** every PR runs ruff, pytest on Python 3.11 and 3.12, and a Docker build with a smoke test of the
+  real model. Pipeline tests include a **top-1 ≥ 62% quality gate** and a training/serving text-parity check.
+* **Fixed along the way:** `tfidf_baseline.ipynb` (still at the repo top level, with `C:\Users\…` paths)
+  moved into `data_pipeline/`. The API's HTML cleaning now matches `preprocess.ipynb` exactly
+  (13 of 4,968 raw texts differed before). `main.ipynb` now runs all five Sprint 1 stages.
+
+## Sprint 3 — Serving & Integration
+The model runs behind a FastAPI server with batch inference, in [`serving/`](serving/README.md):
+
+* `serving/README.md` covers architecture, endpoints, error codes, configuration, monitoring, and how the
+  Frontend and Backend squads integrate.
+* `data_pipeline/sprint3_serving.ipynb` works through each Sprint 3 checklist item against the live app.
+* `serving/clients/` has ready-made JavaScript (frontend) and Python (backend) clients.
+  `serving/demo/` is a reference UI served at `/demo`.
+
+---
+
 
 ## What this does
 Builds a full pipeline that screens/ranks applicant resumes against job descriptions:
@@ -9,6 +64,11 @@ Builds a full pipeline that screens/ranks applicant resumes against job descript
 4. **tfidf_baseline.ipynb** — tokenization, stop words, TF-IDF matching baseline
 5. **embeddings.ipynb** — Sentence-Transformers semantic matching (upgrades the TF-IDF baseline)
 6. **main.ipynb** — runs steps 2–5 in order, end-to-end
+7. **main_sprint2.ipynb** — Sprint 2 evaluation (similarity theory, zero-shot, accuracy, edge cases)
+8. **sprint3_serving.ipynb** / **sprint4_production.ipynb** — serving and production walkthroughs
+
+After re-running the pipeline, refresh what the server ships with:
+`python serving/scripts/export_artifacts.py`
 
 ## Setup
 ```bash
@@ -33,16 +93,29 @@ straight to `preprocess.ipynb`.
 ## Project structure
 ```
 applicant_screening_nb/
-├── requirements.txt
-├── README.md
-├── .gitignore
+├── README.md  requirements.txt  .gitignore  .dockerignore
+├── docker-compose.yml         # Sprint 4: local production-like run
+├── render.yaml  railway.json  # Sprint 4: cloud deploy configs
+├── deploy/aws/                # Sprint 4: ECS Express Mode deploy script
+├── .github/
+│   ├── workflows/ci.yml       # Sprint 4: lint → tests → Docker smoke → publish → deploy
+│   ├── pull_request_template.md
+│   └── dependabot.yml
+├── docs/                      # Sprint 4: DEPLOYMENT, MONITORING, CONTRIBUTING, DEMO
+├── serving/                   # Sprint 3–4: FastAPI service (see serving/README.md)
+│   ├── app/                   #   main.py, schemas.py, service.py, monitoring.py, ...
+│   ├── artifacts/             #   committed bundle the server loads (+ drift reference, manifest)
+│   ├── clients/  demo/  tests/  scripts/
+│   ├── Dockerfile
+│   └── requirements*.txt
 └── data_pipeline/
-    ├── config.ipynb
-    ├── download_data.ipynb
-    ├── preprocess.ipynb
-    ├── tfidf_baseline.ipynb
-    ├── embeddings.ipynb
-    └── main.ipynb
+    ├── config.ipynb  download_data.ipynb  preprocess.ipynb
+    ├── tfidf_baseline.ipynb  embeddings.ipynb  main.ipynb           # Sprint 1
+    ├── similarity_theory.ipynb  huggingface_transformers.ipynb       # Sprint 2
+    ├── classification_approach.ipynb  evaluate_recommendations.ipynb
+    ├── edge_cases.ipynb  main_sprint2.ipynb
+    ├── sprint3_serving.ipynb                                         # Sprint 3
+    └── sprint4_production.ipynb                                      # Sprint 4
 data_pipeline/data/            # created on first run — gitignored, not committed
 ├── raw/
 └── processed/
@@ -51,6 +124,10 @@ data_pipeline/data/            # created on first run — gitignored, not commit
 ```
 
 ## Version control setup
+Day-to-day work follows GitHub flow. Branches, PRs, required checks and the rules for
+model/data changes are in [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md). The original
+one-time setup is below.
+
 Run these once, from the `applicant_screening_nb/` folder:
 ```bash
 git init
@@ -58,7 +135,8 @@ git add .
 git commit -m "Sprint 1: product framing, data pipeline, TF-IDF baseline, embeddings"
 ```
 `.gitignore` is already set up to exclude the `data/` folder (regenerated by the
-pipeline, not source), credentials (`kaggle.json`, `access_token`), and standard
+pipeline, not source; the slim `serving/artifacts/` bundle is the one exception, so CI and
+cloud builds work from a clone), credentials (`kaggle.json`, `access_token`), and standard
 Python/Jupyter clutter — so only pipeline code gets tracked, keeping the repo
 reproducible: anyone can clone it and regenerate the same results by running the
 notebooks, rather than relying on committed data files.

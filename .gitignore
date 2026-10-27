@@ -22,3 +22,16 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Tests
+.pytest_cache/
+
+# Sprint 4 ------------------------------------------------------------------
+# The slim serving bundle IS committed (scripts/export_artifacts.py), so CI and
+# cloud builds work from a fresh clone. Re-include it after the *.csv / *.npy rules.
+!serving/artifacts/
+!serving/artifacts/**
+# Prediction logs are runtime data, not source.
+serving/logs/
+.ruff_cache/
+.env
