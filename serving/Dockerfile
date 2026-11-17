@@ -7,7 +7,7 @@
 # or simply:  docker compose up --build
 #
 # Works on Render, Railway, AWS ECS and Fly unchanged: the port comes from $PORT.
-FROM python:3.11-slim
+FROM python:3.15-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
